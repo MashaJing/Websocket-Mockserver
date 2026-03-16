@@ -1,0 +1,63 @@
+name: Build and Publish
+
+on:
+  workflow_dispatch:
+
+env:
+  VERSION: 1.2.3
+  PYTHON_BASE_IMAGE: python:3.11
+  DOCKER_HUB: your-docker-hub-user-or-org
+  DOCKER_PROJECT: your-docker-project
+  REPO_URL: your-pypi-repo-url
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE="${{ env.DOCKER_HUB }}/${{ env.DOCKER_PROJECT }}/${{ github.event.repository.name }}"
+          docker build --pull --build-arg PYTHON_BASE_IMAGE="${{ env.PYTHON_BASE_IMAGE }}" -t "$IMAGE:${{ env.VERSION }}" .
+          docker push "$IMAGE:${{ env.VERSION }}"
+
+  publish:
+    name: Publish Python Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel twine
+
+      - name: Build distribution
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Publish to PyPI (or internal registry)
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          REPO_URL: ${{ env.REPO_URL }}
+        run: |
+          python -m twine upload --repository-url "$REPO_URL" dist/* --verbose
