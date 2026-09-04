@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+python=python3
+if [ -n "${VIRTUAL_ENV:-}" ]; then
+	python="$VIRTUAL_ENV/bin/python"
+elif [ -x "$repo_root/.venv/bin/python" ]; then
+	python="$repo_root/.venv/bin/python"
+fi
+
+echo "Running unit tests before commit..."
+make test PYTHON="$python"

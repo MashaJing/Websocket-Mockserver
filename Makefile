@@ -5,6 +5,12 @@ export VERSION=2.0.1
 export PYPI_URL=pypi
 export REPO_URL=https://github.com/MashaJing/Websocket-Mockserver
 
+PYTHON ?= python3
+
+.PHONY: test
+test:
+	$(PYTHON) -m unittest discover -s websocket_mockserver/unittests
+
 .PHONY: build
 build:
 	docker build --pull -t ${IMAGE}:${VERSION} .

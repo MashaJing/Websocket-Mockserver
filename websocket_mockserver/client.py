@@ -50,7 +50,7 @@ class WebSocketMockServerClient:
         for message in messages:
             data.append({
                 "url_path": self.connection_path,
-                "message": message,
+                "response": message,
                 "type": expected_type,
                 "payload": expected_payload,
             })
