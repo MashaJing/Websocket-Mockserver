@@ -1,9 +1,15 @@
 export DOCKER_USER=mashajing2000
 export PROJECT_NAME=websocket-mockserver
 export IMAGE=${DOCKER_USER}/${PROJECT_NAME}
-export VERSION=2.0.1
+export VERSION=2.0.2
 export PYPI_URL=pypi
 export REPO_URL=https://github.com/MashaJing/Websocket-Mockserver
+
+PYTHON ?= python3
+
+.PHONY: test
+test:
+	$(PYTHON) -m unittest discover -s websocket_mockserver/unittests
 
 .PHONY: build
 build:
